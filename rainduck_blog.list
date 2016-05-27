@@ -1,0 +1,5 @@
+这个博客的作者ndk-jni功底比较扎实
+http://www.cnblogs.com/rainduck/p/3644124.html NativeCode中通过JNI反射调用Java层的代码，以获取IMEI为例
+http://www.cnblogs.com/rainduck/p/4238191.html 使用signal、setjmp、longjmp进行Linux/Android C异常处理 
+http://www.cnblogs.com/rainduck/p/3600472.html Android NDK生成共享库和静态库
+http://www.cnblogs.com/rainduck/p/3577181.html 使用WIFI连接android进行调试和adb操作
