@@ -1,0 +1,9 @@
+
+1、如何生成复杂类型jni调用的头文件
+譬如  private static native void renderPlasma(Bitmap  bitmap, long time_ms); 里面有个 Bitmap  bitmap
+在使用  JNI cannot determine the signature of Bitmap  生成jni 头文件的时候,有如下错误
+yan@yan-Vostro-3800:/data2/workshop/AndroidStudioProjects/beat1studio/app/src/main/java$ javah  -jni com.amaker.app.LocalCall
+Error: Cannot determine signature for Bitmap
+给javah加个参数就ok了
+javah -cp /data/tools/Android/Sdk/platforms/android-17/android.jar:. com.amaker.app.LocalCall
+参考文档: http://prog3.com/sbdm/blog/wxxgreat/article/details/48030775
