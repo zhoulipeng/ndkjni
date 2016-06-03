@@ -7,3 +7,41 @@ Error: Cannot determine signature for Bitmap
 给javah加个参数就ok了
 javah -cp /data/tools/Android/Sdk/platforms/android-17/android.jar:. com.amaker.app.LocalCall
 参考文档: http://prog3.com/sbdm/blog/wxxgreat/article/details/48030775
+
+2、android java native 方法声明有返回值，而在jni实现函数里没有处理返回值则会报奇怪的错误, 并且在不同的android版本上报错信息不一样
+
+在华为p7 android 4.4系统上调用一个jni函数(public native String setLocalIp(String localip);)发现报如下的错误 
+
+06-03 09:40:47.085 6745-6861/com.amaker.app W/dalvikvm: Invalid indirect reference 0x79fda148 in decodeIndirectRef
+06-03 09:40:47.085 6745-6861/com.amaker.app I/dalvikvm: "Thread-382" prio=5 tid=16 RUNNABLE
+06-03 09:40:47.085 6745-6861/com.amaker.app I/dalvikvm:   | group="main" sCount=0 dsCount=0 obj=0x433d50a0 self=0x79fd98a0
+06-03 09:40:47.085 6745-6861/com.amaker.app I/dalvikvm:   | sysTid=6861 nice=0 sched=0/0 cgrp=apps handle=2046663928
+06-03 09:40:47.085 6745-6861/com.amaker.app I/dalvikvm:   | state=R schedstat=( 512096 34528 3 ) utm=0 stm=0 core=0
+06-03 09:40:47.085 6745-6861/com.amaker.app I/dalvikvm:     at com.amaker.app.LocalCall.setLocalIp(Native Method)
+06-03 09:40:47.085 6745-6861/com.amaker.app I/dalvikvm:     at com.amaker.app.beat$3.run(beat.java:537)
+06-03 09:40:47.085 6745-6861/com.amaker.app I/dalvikvm:     at java.lang.Thread.run(Thread.java:841)
+
+但是当同样的问题出现在mx3 android 5.0.1上是报错信息则比较明显：
+
+06-03 09:50:03.005 5817-6398/com.amaker.app I/LocalCpp: jni/local_jni.cpp:81:welcome jni=welcome jni
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65] JNI DETECTED ERROR IN APPLICATION: invalid reference returned from java.lang.String com.amaker.app.LocalCall.setLocalIp(java.lang.String)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]     from java.lang.String com.amaker.app.LocalCall.setLocalIp(java.lang.String)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65] "Thread-421" prio=5 tid=23 Runnable
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   | group="main" sCount=0 dsCount=0 obj=0x12f70800 self=0xab834400
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   | sysTid=6398 nice=0 cgrp=apps sched=0/0 handle=0xb4fa4400
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   | state=R schedstat=( 0 0 0 ) utm=0 stm=0 core=0 HZ=100
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   | stack=0x9e86e000-0x9e870000 stackSize=1036KB
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   | held mutexes= "mutator lock"(shared held)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #00 pc 00004c58  /system/lib/libbacktrace_libc++.so (UnwindCurrent::Unwind(unsigned int, ucontext*)+23)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #01 pc 000034c1  /system/lib/libbacktrace_libc++.so (Backtrace::Unwind(unsigned int, ucontext*)+8)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #02 pc 0025289d  /system/lib/libart.so (art::DumpNativeStack(std::__1::basic_ostream<char, std::__1::char_traits<char> >&, int, char const*, art::mirror::ArtMethod*)+84)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #03 pc 0023637b  /system/lib/libart.so (art::Thread::Dump(std::__1::basic_ostream<char, std::__1::char_traits<char> >&) const+162)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #04 pc 000b1215  /system/lib/libart.so (art::JniAbort(char const*, char const*)+620)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #05 pc 000b1945  /system/lib/libart.so (art::JniAbortF(char const*, char const*, ...)+68)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #06 pc 002729d1  /system/lib/libart.so (art::CheckReferenceResult(art::mirror::Object*, art::Thread*)+784)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #07 pc 00086e9f  /system/lib/libart.so (art::JniMethodEndWithReference(_jobject*, unsigned int, art::Thread*)+74)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   native: #08 pc 00001d09  /data/data/com.amaker.app/cache/slice-slice_8-classes.dex (Java_com_amaker_app_LocalCall_setLocalIp__Ljava_lang_String_2+112)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   at com.amaker.app.LocalCall.setLocalIp(Native method)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   at com.amaker.app.beat$3.run(beat.java:537)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65]   at java.lang.Thread.run(Thread.java:818)
+06-03 09:50:03.075 5817-6398/com.amaker.app A/art: art/runtime/check_jni.cc:65] 
