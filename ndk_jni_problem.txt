@@ -6,9 +6,18 @@ yan@yan-Vostro-3800:/data2/workshop/AndroidStudioProjects/beat1studio/app/src/ma
 Error: Cannot determine signature for Bitmap
 给javah加个参数就ok了
 javah -cp /data/tools/Android/Sdk/platforms/android-17/android.jar:. com.amaker.app.LocalCall
+参数解释： -cp 后面的参数为 类所在的jar包, : 后面接 com所在的目录, 注意没有空格，都是-cp的参数  com.amaker.app.LocalCall则为要生成jni头文件的java类文件。
 参考文档: http://prog3.com/sbdm/blog/wxxgreat/article/details/48030775
 
 2、android java native 方法声明有返回值，而在jni实现函数里没有处理返回值则会报奇怪的错误, 并且在不同的android版本上报错信息不一样
+下面是jni 实现， 没有处理 jstring返回值
+JNIEXPORT jstring JNICALL Java_com_amaker_app_LocalCall_setLocalIp
+        (JNIEnv *env, jobject, jstring jstr)
+{
+    const char *c_name = env->GetStringUTFChars(jstr ,NULL);//转换成 char *
+    LOG_PRINT(ANDROID_LOG_INFO, LOG_TAG, "jni level ip = %s", c_name);
+    env->ReleaseStringUTFChars(jstr, c_name); //释放引用
+}
 
 在华为p7 android 4.4系统上调用一个jni函数(public native String setLocalIp(String localip);)发现报如下的错误 
 
